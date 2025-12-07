@@ -114,7 +114,74 @@ app.post("/api/members" async (req, res) => {
 		res.status(500).json({success : false, error : "Faled to create member"});
 
 	}
-})
+});
+
+app.put("/api/members/:id", async (req, res) => {
+	try {
+
+		const { id } = req.params;
+		const { name, email } = req.body;
+
+		if(!name || !email) {
+			return res.status(400).json({
+				success : false,
+				error : "Atleast one field (name or email) is required"
+			});
+		}
+
+		if(email && (!email.includes("@") || !email.includes("."))) {
+			return res.status(400).json({
+				success : false,
+				error : "Invalid email format"
+			});
+		}
+
+		const updates: string[] = [];
+		const values: any[] = [];
+
+		if(name) {
+			updates.push("name = ?");
+			values.push(name);
+		}
+
+		if(email) {
+			updates.push("email = ?");
+			values.push(email);
+		}
+
+		values.push(id);
+
+		const result  = await env.DB.prepare(
+			`UPDATE members SET ${updates.join(", ")} WHERE id = ?`
+		)
+		.bind(...values)
+		.run();
+
+		
+		if(result.meta.changes === 0) {
+			return res.status(404).json({
+				success : false,
+				error : "Member not found"
+			});
+		}
+
+		res.json({success : true, message : "Member updated successfully"});
+
+	} catch(error) {
+		if(error.message?.includes("UNIQUE constraint failed")) {
+			return res.status(409).json({
+				success : false,
+				error : "Email already exists"
+			});
+		}
+
+		res.status(500).json({
+			success : false,
+			error : "Failed to update member"
+		});
+
+	}
+});
 
 
 app.listen(3000);
