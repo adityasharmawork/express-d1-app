@@ -33,6 +33,21 @@ app.get("/", (req, res) => {
 	res.json({message: "Express.js running on Cloudflare Workers!"});
 });
 
+app.get("/api/members", aysnc (req, res) => {
+	try {
+
+		const { results } = await env.DB.prepare('SELECT * FROM members ORDER_BY joined_date DESC').all();
+
+		res.json({ success : true, members : results });
+
+	} catch(error) {
+
+		res.status(500).json({ success : false, error : "Failed to fetch members!	" });
+
+	}
+});
+
+
 app.listen(3000);
 
 export default httpServerHandler({ port : 3000 });
