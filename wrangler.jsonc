@@ -12,6 +12,13 @@
 	},
 	"compatibility_flags": [
 		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "members-db",
+			"database_id": "f9b7bebb-3745-44c6-8a30-ef621c454be9"
+		}
 	]
 	/**
 	 * Smart Placement
