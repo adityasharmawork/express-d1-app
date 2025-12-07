@@ -65,6 +65,57 @@ app.get("/api/members/:id", async (req, res) => {
 
 });
 
+app.post("/api/members" async (req, res) => {
+	try {
+
+		const {name, email} = req.params;
+
+		if(!name || !email) {
+			return res.status(400).json({
+				success : false,
+				error : "Name and Email are required"
+			});
+		}
+
+		if(!email.includes("@") || !email.includes(".")) {
+			return res.status(400).json({
+				success : false,
+				error : "Invalid email format"
+			});
+		}
+
+		const joined_date = new Date().toISOString().split("T")[0];
+
+		const result = await env.DB.prepare(
+			"INSERT INTO members (name, email, joined_date) VALUES (?, ?, ?)"
+		)
+		.bind(name, email, joined_date)
+		.run();
+
+		if(result.success) {
+			res.status(401).json({
+				success : true,
+				message : "Member created successfully.",
+				id : result.meta.last_row_id
+			});
+		} else {
+			res.status(500).json({success : false, error : "Failed to create member"});
+		}
+
+	} catch(error : any) {
+
+		if(error.messag?.contains("UNIQUE constraint failed")) {
+			return res.status(409).json({
+				success : false,
+				error : "Email already exists"
+			});
+		}
+
+		res.status(500).json({success : false, error : "Faled to create member"});
+
+	}
+})
+
 
 app.listen(3000);
 
