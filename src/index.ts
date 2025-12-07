@@ -33,10 +33,10 @@ app.get("/", (req, res) => {
 	res.json({message: "Express.js running on Cloudflare Workers!"});
 });
 
-app.get("/api/members", aysnc (req, res) => {
+app.get("/api/members", async (req, res) => {
 	try {
 
-		const { results } = await env.DB.prepare('SELECT * FROM members ORDER_BY joined_date DESC').all();
+		const { results } = await env.DB.prepare('SELECT * FROM members ORDER BY joined_date DESC').all();
 
 		res.json({ success : true, members : results });
 
@@ -65,10 +65,10 @@ app.get("/api/members/:id", async (req, res) => {
 
 });
 
-app.post("/api/members" async (req, res) => {
+app.post("/api/members", async (req, res) => {
 	try {
 
-		const {name, email} = req.params;
+		const {name, email} = req.body;
 
 		if(!name || !email) {
 			return res.status(400).json({
@@ -104,7 +104,7 @@ app.post("/api/members" async (req, res) => {
 
 	} catch(error : any) {
 
-		if(error.messag?.contains("UNIQUE constraint failed")) {
+		if(error.message?.includes("UNIQUE constraint failed")) {
 			return res.status(409).json({
 				success : false,
 				error : "Email already exists"
@@ -122,7 +122,7 @@ app.put("/api/members/:id", async (req, res) => {
 		const { id } = req.params;
 		const { name, email } = req.body;
 
-		if(!name || !email) {
+		if(!name && !email) {
 			return res.status(400).json({
 				success : false,
 				error : "Atleast one field (name or email) is required"
