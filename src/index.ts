@@ -183,6 +183,30 @@ app.put("/api/members/:id", async (req, res) => {
 	}
 });
 
+app.delete("/api/members/:id", async (req, res) => {
+	try {
+
+		const {id} = req.params;
+
+		const result = await env.DB.prepare("DELETE FROM members WHERE id = ?").bind(id).run();
+
+		if(result.meta.changes === 0) {
+			return res.status(404).json({
+				success : false,
+				error : "Member not found"
+			});
+		}
+
+		res.json({success : true, message : "Member deleted successfully"});
+
+	} catch(error) {
+		res.status(500).json({
+			success : false,
+			error : "Failed to delete member"
+		});
+	}
+});
+
 
 app.listen(3000);
 
