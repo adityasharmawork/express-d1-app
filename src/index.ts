@@ -47,6 +47,24 @@ app.get("/api/members", aysnc (req, res) => {
 	}
 });
 
+app.get("/api/members/:id", async (req, res) => {
+	
+	try {
+		const {id} = req.params;
+	
+		const { results } = await env.DB.prepare('SELECT * FROM members WHERE id = ?').bind(id).all();
+	
+		if(results.length == 0) {
+			return res.status(400).json({success : false, message : "Member not found"});
+		}
+
+		res.json({success : true, member : results[0]});
+	} catch(error) {
+		res.status(500).json({success : false, error : "Failed to fetch member"});
+	}
+
+});
+
 
 app.listen(3000);
 
